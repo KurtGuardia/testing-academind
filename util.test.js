@@ -1,3 +1,4 @@
+const puppeteer = require('puppeteer');
 const { generateText, checkAndGenerate } = require('./util');
 
 //Unit Testing
@@ -21,3 +22,22 @@ test('should generate a valid text output', () => {
   const text = checkAndGenerate('Max', 29);
   expect(text).toBe('Max (29 years old)');
 });
+
+//E2E Testing
+test('should create an element', async () => {
+  const browser = await puppeteer.launch({
+    headless: true,
+    // slowMo: 80,
+    args: ['--window-size=1720,800'],
+  });
+  const page = await browser.newPage();
+  await page.goto('http://127.0.0.1:5500/index.html');
+
+  await page.click('input#name');
+  await page.type('input#name', 'Anna');
+  await page.click('input#age');
+  await page.type('input#age', '28');
+  await page.click('#btnAddUser');
+  const finalText = await page.$eval('.user-item', (el) => el.textContent);
+  expect(finalText).toBe('Anna (28 years old)');
+}, 10000);
